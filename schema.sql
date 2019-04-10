@@ -1,19 +1,39 @@
-create database assistlist;
-use assistlist; 
+/**
+* Lb Admin
+* @author evilnapsis
+**/
+create database assistlistmax;
+use assistlistmax;
 
-create table user (
+
+
+create table kind(
 	id int not null auto_increment primary key,
-	username varchar(50) not null,
-	name varchar(50) not null,
-	lastname varchar(50) not null,
-	email varchar(255) not null,
-	password varchar(60) not null,
-	is_active boolean not null default 1,
-	is_admin boolean not null default 0,
-	created_at datetime
+	name varchar(50) not null
 );
 
-insert into user (username,password,is_admin,created_at) value ("admin",sha1(md5("admin")),1,NOW());
+insert into kind (name) value ("Administrador");
+insert into kind (name) value ("Usuario");
+
+
+create table user(
+	id int not null auto_increment primary key,
+	bio text,
+	image varchar(255),
+	name varchar(50) not null,
+	lastname varchar(50) not null,
+	username varchar(50),
+	email varchar(255) not null,
+	password varchar(60) not null,
+	phone varchar(255),
+	address varchar(255),
+	code varchar(20),
+	status boolean not null default 0,
+	kind boolean not null default 0,
+	created_at datetime not null
+);
+
+insert into user(email,password,status,kind,created_at) value ("admin","90b9aa7e25f80cf4f64e990b78a9fc5ebd6cecad",1,1,NOW());
 
 
 create table person(
