@@ -2,8 +2,24 @@
 class RecoverData {
 	public static $tablename = "recover";
 
+	public $id;
+	public $name;
+	public $lastname;
+	public $email;
+	public $password;
+	public $created_at;
+	public $user_id;
+	public $code;
+	public $nick;
+	public $mail;
+	public $image;
+	public $status;
+	public $usertype;
+	public $is_admin;
+	public $is_verified;
+	public $is_used;
 
-	public function RecoverData(){
+	public function __construct(){
 		$this->name = "";
 		$this->lastname = "";
 		$this->email = "";
@@ -65,9 +81,6 @@ class RecoverData {
 
 	}
 
-
-
-	
 	public static function getLike($q){
 		$sql = "select * from ".self::$tablename." where name like '%$q%'";
 		$query = Executor::doit($sql);

@@ -1,9 +1,10 @@
 /**
-* Lb Admin
+* AssistList
 * @author evilnapsis
+* Updated 2026-03-20
 **/
-create database assistlistmax;
-use assistlistmax;
+create database assistlist;
+use assistlist;
 
 
 

@@ -2,8 +2,23 @@
 class UserData {
 	public static $tablename = "user";
 
+	public $id;
+	public $name;
+	public $lastname;
+	public $email;
+	public $password;
+	public $created_at;
+	public $image;
+	public $username;
+	public $kind;
+	public $status;
+	public $bio;
+	public $address;
+	public $phone;
+	public $is_active;
+	public $code;
 
-	public function Userdata(){
+	public function __construct(){
 		$this->name = "";
 		$this->lastname = "";
 		$this->email = "";

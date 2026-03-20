@@ -1,19 +1,18 @@
+<?php if(isset($_GET["opt"]) && $_GET["opt"]=="all"):?>
 <div class="content">
 <div class="row">
 	<div class="col-md-12">
 		<h1>Reporte de Asistencia</h1>
-<!--	<a href="index.php?view=list&team_id=<?php echo $_GET["team_id"]; ?>" class="btn btn-default"><i class='fa fa-check'></i> Asistencia</a> -->
 <form class="form-horizontal" id="loadlist" role="form">
-  <div class="form-group">
+  <div class="form-group row mb-2">
     <label for="inputEmail1" class="col-lg-2 control-label">Inicio/Fin:</label>
-    <div class="col-lg-3">
+    <div class="col-lg-3 mb-2">
       <input type="date" name="start_at" value="<?php echo date("Y-m-d");?>" required class="form-control" >
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-3 mb-2">
       <input type="date" name="finish_at" value="<?php echo date("Y-m-d");?>" required class="form-control" >
     </div>
-    <div class="col-lg-offset-3">
-    <input type="hidden" name="team_id" value="<?php echo $_GET["team_id"];?>">
+    <div class="col-lg-3">
       <button type="submit" class="btn btn-primary">Buscar</button>
     </div>
 
@@ -31,10 +30,11 @@
 	$("#loadlist").submit(function(e){
 		e.preventDefault();
 		var d = $("#loadlist").serialize();
-		$.get("./?action=loadlist",d,function(data){
+		$.get("./?action=reports&opt=load",d,function(data){
 			console.log(data);
 			$("#data").html(data);
 
 		});
 	});
 </script>
+<?php endif; ?>

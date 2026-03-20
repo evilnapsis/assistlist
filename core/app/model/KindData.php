@@ -2,8 +2,16 @@
 class KindData {
 	public static $tablename = "kind";
 
+	public $id;
+	public $title;
+	public $content;
+	public $image;
+	public $user_id;
+	public $is_public;
+	public $created_at;
+	public $name;
 
-	public function KindData(){
+	public function __construct(){
 		$this->title = "";
 		$this->content = "";
 		$this->image = "";
@@ -14,7 +22,7 @@ class KindData {
 
 	public function add(){
 		$sql = "insert into ".self::$tablename." (name,created_at) ";
-		echo $sql .= "value (\"$this->name\",$this->created_at)";
+		$sql .= "value (\"$this->name\",$this->created_at)";
 		Executor::doit($sql);
 	}
 
@@ -44,7 +52,7 @@ class KindData {
 	public static function getAll(){
 		$sql = "select * from ".self::$tablename;
 		$query = Executor::doit($sql);
-		return Model::many($query[0],new KindData());
+		return Model:: many($query[0],new KindData());
 	}
 
 	public static function getLast10(){

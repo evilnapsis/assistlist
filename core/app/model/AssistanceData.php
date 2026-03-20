@@ -2,8 +2,18 @@
 class AssistanceData {
 	public static $tablename = "assistance";
 
+	public $id;
+	public $name;
+	public $lastname;
+	public $email;
+	public $password;
+	public $created_at;
+	public $date_at;
+	public $person_id;
+	public $kind_id;
+	public $user_id;
 
-	public function AssistanceData(){
+	public function __construct(){
 		$this->name = "";
 		$this->lastname = "";
 		$this->email = "";
@@ -13,7 +23,7 @@ class AssistanceData {
 
 	public function add(){
 		$sql = "insert into ".self::$tablename." (date_at,person_id,kind_id,user_id) ";
-		echo $sql .= "value (\"$this->date_at\",$this->person_id,$this->kind_id,$this->user_id)";
+		$sql .= "value (\"$this->date_at\",$this->person_id,$this->kind_id,$this->user_id)";
 		return Executor::doit($sql);
 	}
 

@@ -8,7 +8,7 @@ Sistema de Control de Asistencias desarrollado con PHP y MySQL
 - Reportes
 - usuarios
 
-### v3.0 - 2019
+### v3.0 - 2026
 - Update PHP 8
 - Template Core UI 4
 
