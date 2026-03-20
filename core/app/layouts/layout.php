@@ -200,8 +200,8 @@
         </div>
       </div>
       <footer class="footer">
-        <div><a href="https://evilnapsis.com/">Evilnapsis </a> © 2022.</div>
-        <div class="ms-auto">Version <b>2.0</b></div> 
+        <div><a href="https://evilnapsis.com/">Evilnapsis </a> © 2026.</div>
+        <div class="ms-auto">Version <b>3.0</b></div> 
       </footer>
     </div>
     <?php endif; ?>
