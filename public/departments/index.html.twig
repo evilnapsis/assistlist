@@ -1,0 +1,74 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}Departamentos{% endblock %}
+{% block page_title %}Departamentos Empresariales{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h5 class="fw-bold mb-0 text-dark">Estructura Organizacional</h5>
+        <small class="text-muted">Áreas y departamentos para agrupar colaboradores</small>
+    </div>
+    <a href="{{ base_url }}/departments/new" class="btn btn-primary fw-semibold">
+        <i class="bi bi-plus-circle me-1"></i> Nuevo Departamento
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-3 bg-white">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small text-uppercase">
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre del Departamento</th>
+                    <th>Líder / Responsable</th>
+                    <th>Descripción</th>
+                    <th class="text-center">Colaboradores</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in departments %}
+                <tr>
+                    <td>
+                        <span class="badge bg-light text-dark border font-monospace fs-6">{{ d.code }}</span>
+                    </td>
+                    <td>
+                        <div class="fw-bold text-dark">{{ d.name }}</div>
+                    </td>
+                    <td>
+                        <span class="small text-secondary"><i class="bi bi-person-badge me-1"></i>{{ d.manager_name|default('Sin asignar') }}</span>
+                    </td>
+                    <td>
+                        <small class="text-muted">{{ d.description|default('-') }}</small>
+                    </td>
+                    <td class="text-center">
+                        <a href="{{ base_url }}/employees?department_id={{ d.id }}" class="badge bg-primary-subtle text-primary text-decoration-none fw-bold fs-6">
+                            {{ d.total_employees }}
+                        </a>
+                    </td>
+                    <td>
+                        {% if d.is_active %}
+                            <span class="badge bg-success-subtle text-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ base_url }}/departments/{{ d.id }}/edit" class="btn btn-outline-secondary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{{ base_url }}/departments/{{ d.id }}/delete" class="btn btn-outline-danger" title="Desactivar" onclick="return confirm('¿Deseas desactivar este departamento?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

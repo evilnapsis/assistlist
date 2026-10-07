@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - AssistList Lite v4</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ base_url }}/assets/coreui/css/style.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            background: #ffffff;
+            border-radius: 1.25rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 440px;
+            overflow: hidden;
+        }
+        .btn-success-brand {
+            background-color: #10b981;
+            border: none;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.65rem;
+            transition: all 0.2s;
+        }
+        .btn-success-brand:hover {
+            background-color: #059669;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card p-4 p-sm-5">
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-success-subtle text-success rounded-circle mb-3 p-3">
+                <i class="bi bi-calendar-check-fill fs-1"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-1">AssistList <span class="badge text-white ms-1" style="background-color: #9333ea; font-size: 0.85rem; vertical-align: middle;">v4</span></h3>
+            <p class="text-muted small">Sistema de Control de Asistencias con PHP y MySQL</p>
+        </div>
+
+        {% if flashes.error %}
+            <div class="alert alert-danger py-2 small border-0 shadow-sm mb-3">
+                <i class="bi bi-exclamation-circle-fill me-1"></i> {{ flashes.error }}
+            </div>
+        {% endif %}
+        {% if flashes.info %}
+            <div class="alert alert-info py-2 small border-0 shadow-sm mb-3">
+                <i class="bi bi-info-circle-fill me-1"></i> {{ flashes.info }}
+            </div>
+        {% endif %}
+
+        <form action="{{ base_url }}/login" method="POST">
+            {{ csrf_field() }}
+
+            <div class="mb-3">
+                <label class="form-label small fw-semibold text-secondary">Usuario o Correo</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                    <input type="text" name="username" class="form-control border-start-0" placeholder="admin o admin@empresa.com" value="admin" required autofocus>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-semibold text-secondary">Contraseña</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                    <input type="password" name="password" class="form-control border-start-0" placeholder="Contraseña" value="admin" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success-brand w-100 fs-6 shadow-sm mb-3">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión
+            </button>
+
+            <div class="p-3 bg-light rounded text-center small text-muted">
+                <strong>Credenciales de prueba:</strong><br>
+                Usuario: <code>admin</code> • Contraseña: <code>admin</code>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

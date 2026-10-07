@@ -1,0 +1,119 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}Colaboradores{% endblock %}
+{% block page_title %}Colaboradores / Empleados{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h5 class="fw-bold mb-0 text-dark">Nómina de Colaboradores</h5>
+        <small class="text-muted">Gestión de personal de la empresa</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ base_url }}/attendance/take" class="btn btn-outline-success fw-semibold">
+            <i class="bi bi-ui-checks me-1"></i> Pasar Asistencia
+        </a>
+        <a href="{{ base_url }}/employees/new" class="btn btn-primary fw-semibold">
+            <i class="bi bi-person-plus me-1"></i> Registrar Empleado
+        </a>
+    </div>
+</div>
+
+<!-- Filtro por Departamento -->
+<div class="card border-0 shadow-sm rounded-3 bg-white p-3 mb-3">
+    <form method="GET" action="{{ base_url }}/employees" class="row g-2 align-items-center">
+        <div class="col-sm-4">
+            <label class="form-label small fw-bold text-secondary text-uppercase mb-1">Filtrar por Departamento</label>
+            <select name="department_id" class="form-select" onchange="this.form.submit()">
+                <option value="">-- Todos los Departamentos --</option>
+                {% for d in departments %}
+                    <option value="{{ d.id }}" {{ selected_dept == d.id ? 'selected' : '' }}>
+                        [{{ d.code }}] {{ d.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-sm-2 d-flex align-items-end pt-3 pt-sm-0">
+            {% if selected_dept %}
+                <a href="{{ base_url }}/employees" class="btn btn-outline-secondary w-100">Limpiar</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="card border-0 shadow-sm rounded-3 bg-white">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small text-uppercase">
+                <tr>
+                    <th>Código</th>
+                    <th>Colaborador</th>
+                    <th>Departamento</th>
+                    <th>Cargo / Puesto</th>
+                    <th>Contacto</th>
+                    <th>Fecha Ingreso</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if employees is empty %}
+                    <tr><td colspan="8" class="text-center py-4 text-muted">No se encontraron empleados.</td></tr>
+                {% else %}
+                    {% for emp in employees %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-light text-dark border font-monospace">{{ emp.code }}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px;">
+                                    {{ emp.name|slice(0, 1)|upper }}
+                                </div>
+                                <div>
+                                    <a href="{{ base_url }}/employees/{{ emp.id }}" class="fw-bold text-dark text-decoration-none">
+                                        {{ emp.name }} {{ emp.lastname }}
+                                    </a>
+                                    <small class="text-muted d-block">{{ emp.dni_cif ? 'DNI: ' ~ emp.dni_cif : '' }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info-subtle text-info fw-semibold">{{ emp.department_name|default('Sin Asignar') }}</span>
+                        </td>
+                        <td>
+                            <span class="fw-medium small">{{ emp.job_title }}</span>
+                        </td>
+                        <td>
+                            <small class="text-muted d-block"><i class="bi bi-envelope me-1"></i>{{ emp.email|default('-') }}</small>
+                            <small class="text-muted d-block"><i class="bi bi-telephone me-1"></i>{{ emp.phone|default('-') }}</small>
+                        </td>
+                        <td class="small text-muted">{{ emp.hire_date ? emp.hire_date|date('d/m/Y') : '-' }}</td>
+                        <td>
+                            {% if emp.is_active %}
+                                <span class="badge bg-success-subtle text-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ base_url }}/employees/{{ emp.id }}" class="btn btn-outline-info" title="Ficha y Asistencias">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ base_url }}/employees/{{ emp.id }}/edit" class="btn btn-outline-secondary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ base_url }}/employees/{{ emp.id }}/delete" class="btn btn-outline-danger" title="Desactivar" onclick="return confirm('¿Deseas desactivar a este colaborador?');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

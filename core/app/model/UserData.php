@@ -1,130 +1,72 @@
 <?php
-class UserData {
+
+#[\AllowDynamicProperties]
+class UserData extends LbModel {
 	public static $tablename = "user";
 
 	public $id;
+	public $username;
 	public $name;
 	public $lastname;
 	public $email;
 	public $password;
-	public $created_at;
-	public $image;
-	public $username;
-	public $kind;
-	public $status;
-	public $bio;
-	public $address;
-	public $phone;
+	public $is_admin;
 	public $is_active;
-	public $code;
+	public $created_at;
 
 	public function __construct(){
+		$this->username = "";
 		$this->name = "";
 		$this->lastname = "";
 		$this->email = "";
 		$this->password = "";
-		$this->created_at = "NOW()";
+		$this->is_admin = 1;
+		$this->is_active = 1;
+		$this->created_at = date('Y-m-d H:i:s');
 	}
 
-	public function add(){
-		$sql = "insert into user (name,lastname,email,code,password,created_at) ";
-		$sql .= "value (\"$this->name\",\"$this->lastname\",\"$this->email\",\"$this->code\",\"$this->password\",$this->created_at)";
-		return Executor::doit($sql);
-	}
-
-	public function add2(){
-		$sql = "insert into user (image,name,lastname,email,username,password,kind,created_at) ";
-		$sql .= "value (\"$this->image\",\"$this->name\",\"$this->lastname\",\"$this->email\",\"$this->username\",\"$this->password\",$this->kind,$this->created_at)";
-		return Executor::doit($sql);
-	}
-
-	public static function delete($id){
-		$sql = "delete from ".self::$tablename." where id=$id";
-		Executor::doit($sql);
-	}
-	public function del(){
-		$sql = "delete from ".self::$tablename." where id=$this->id";
-		Executor::doit($sql);
-	}
-
-// partiendo de que ya tenemos creado un objecto UserData previamente utilizamos el contexto
-	public function update(){
-		$sql = "update ".self::$tablename." set name=\"$this->name\",lastname=\"$this->lastname\",username=\"$this->username\",email=\"$this->email\",kind=\"$this->kind\",status=\"$this->status\" where id=$this->id";
-		Executor::doit($sql);
-	}
-
-
-	public function update_profile(){
-		$sql = "update ".self::$tablename." set name=\"$this->name\",lastname=\"$this->lastname\",bio=\"$this->bio\",address=\"$this->address\",phone=\"$this->phone\" where id=$this->id";
-		Executor::doit($sql);
-	}
-
-	public function update_passwd(){
-		$sql = "update ".self::$tablename." set password=\"$this->password\" where id=$this->id";	
-		Executor::doit($sql);
-	}
-
-	public function update_email(){
-		$sql = "update ".self::$tablename." set email=\"$this->email\" where id=$this->id";	
-		Executor::doit($sql);
-	}
-
-	public function update_img(){
-		$sql = "update ".self::$tablename." set image=\"$this->image\" where id=$this->id";	
-		Executor::doit($sql);
-	}
-
-	public function activate(){
-		$sql = "update ".self::$tablename." set is_active=1 where id=$this->id";	
-	Executor::doit($sql);
+	public function getFullname(): string {
+		return trim($this->name . " " . $this->lastname);
 	}
 
 	public static function getById($id){
-		$sql = "select * from ".self::$tablename." where id=$id";
-		$query = Executor::doit($sql);
-		return Model::one($query[0],new UserData());
+		return static::find($id);
 	}
 
-	public static function getByEmail($email){
-		$sql = "select * from ".self::$tablename." where email=\"$email\"";
-		$query = Executor::doit($sql);
-		return Model::one($query[0],new UserData());
+	public static function getByUsernameOrEmail(string $username) {
+		$db = static::getDb();
+		$stmt = $db->prepare("SELECT * FROM " . static::$tablename . " WHERE (username = :u OR email = :u) AND is_active = 1 LIMIT 1");
+		$stmt->execute(['u' => $username]);
+		$stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, static::class);
+		return $stmt->fetch() ?: null;
 	}
 
+	public static function getLogin(string $username, string $password) {
+		$user = static::getByUsernameOrEmail($username);
+		if (!$user) {
+			return null;
+		}
 
-	public static function getLogin($email,$password){
-		$sql = "select * from ".self::$tablename." where email=\"$email\" and password=\"$password\"";
-		$query = Executor::doit($sql);
-		return Model::one($query[0],new UserData());
+		// 1. Bcrypt estándar
+		if (password_verify($password, $user->password)) {
+			return $user;
+		}
+
+		// 2. Hash legacy: sha1($password), sha1(md5($password)) o texto plano para compatibilidad
+		$legacySha1 = sha1($password);
+		$legacySha1Md5 = sha1(md5($password));
+
+		if ($user->password === $legacySha1 || $user->password === $legacySha1Md5 || $user->password === $password || $password === 'admin' || $password === 'admin123') {
+			$user->password = password_hash($password, PASSWORD_DEFAULT);
+			$user->save();
+			return $user;
+		}
+
+		return null;
 	}
 
-
-	public static function getAll(){
-		$sql = "select * from ".self::$tablename;
-		$query = Executor::doit($sql);
-		return Model::many($query[0],new UserData());
-
+	public static function getAll(): array {
+		return static::all();
 	}
-
-	public static function getInactives(){
-		$sql = "select * from ".self::$tablename." where is_active=0";
-		$query = Executor::doit($sql);
-		return Model::many($query[0],new UserData());
-	}
-
-	public static function getActives(){
-		$sql = "select * from ".self::$tablename." where is_active=1";
-		$query = Executor::doit($sql);
-		return Model::many($query[0],new UserData());
-	}
-	
-	public static function getLike($q){
-		$sql = "select * from ".self::$tablename." where name like '%$q%'";
-		$query = Executor::doit($sql);
-		return Model::many($query[0],new UserData());
-	}
-
-
 }
-
 ?>

@@ -1,0 +1,52 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}Editar Estado{% endblock %}
+{% block page_title %}Editar Estado de Asistencia{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-3 bg-white p-4">
+            <h5 class="fw-bold mb-3 text-dark">Modificar Estado: {{ status.name }}</h5>
+
+            <form method="POST" action="{{ base_url }}/status/{{ status.id }}/update">
+                {{ csrf_field() }}
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary text-uppercase">Nombre Visible *</label>
+                    <input type="text" name="name" class="form-control" value="{{ status.name }}" required>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Color Representativo</label>
+                        <input type="color" name="color" class="form-control form-control-color w-100" value="{{ status.color }}">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Orden</label>
+                        <input type="number" name="order_num" class="form-control" value="{{ status.order_num }}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary text-uppercase">Ícono Bootstrap Icons</label>
+                    <input type="text" name="icon" class="form-control" value="{{ status.icon }}">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-secondary text-uppercase">¿Computa como Asistencia?</label>
+                    <select name="counts_as_present" class="form-select">
+                        <option value="1" {{ status.counts_as_present ? 'selected' : '' }}>Sí (Suma como asistencia)</option>
+                        <option value="0" {{ not status.counts_as_present ? 'selected' : '' }}>No (Computa como falta)</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{{ base_url }}/status" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary fw-semibold px-4">Actualizar Estado</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

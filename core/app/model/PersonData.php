@@ -1,120 +1,119 @@
 <?php
-class PersonData
-{
+
+#[\AllowDynamicProperties]
+class PersonData extends LbModel {
 	public static $tablename = "person";
 
 	public $id;
-	public $title;
+	public $code;
 	public $name;
 	public $lastname;
-	public $address;
-	public $phone;
+	public $dni_cif;
 	public $email;
+	public $phone;
+	public $address;
+	public $job_title;
+	public $department_id;
+	public $hire_date;
+	public $salary;
 	public $image;
-	public $password;
-	public $is_public;
-	public $created_at;
-	public $user_id;
-	public $c1_fullname;
-	public $c1_address;
-	public $c1_phone;
-	public $c1_note;
-	public $last_active_at;
-	public $c2_fullname;
-	public $c2_address;
-	public $c2_phone;
-	public $c2_note;
 	public $is_active;
+	public $created_at;
 
-	public function __construct()
-	{
-		$this->title = "";
+	// Propiedades relacionales / dinámicas
+	public $department_name;
+	public $department_code;
+	public $today_status_id;
+	public $today_status_name;
+	public $today_status_color;
+	public $today_status_icon;
+	public $today_status_badge;
+	public $today_note;
+	public $today_time_in;
+	public $today_time_out;
+
+	public function __construct(){
+		$this->code = "EMP-" . rand(100, 999);
+		$this->name = "";
+		$this->lastname = "";
+		$this->dni_cif = "";
 		$this->email = "";
+		$this->phone = "";
+		$this->address = "";
+		$this->job_title = "Colaborador";
+		$this->department_id = null;
+		$this->hire_date = date('Y-m-d');
+		$this->salary = 0.00;
 		$this->image = "";
-		$this->password = "";
-		$this->is_public = "0";
-		$this->created_at = "NOW()";
+		$this->is_active = 1;
+		$this->created_at = date('Y-m-d H:i:s');
 	}
 
-
-
-	public function add()
-	{
-		$sql = "insert into " . self::$tablename . " (name,lastname,address,phone,email,user_id,created_at,c1_fullname,c1_address,c1_phone,c1_note) ";
-		$sql .= "value (\"$this->name\",\"$this->lastname\",\"$this->address\",\"$this->phone\",\"$this->email\",$this->user_id,$this->created_at,\"$this->c1_fullname\",\"$this->c1_address\",\"$this->c1_phone\",\"$this->c1_note\")";
-		return Executor::doit($sql);
+	public function getFullname(): string {
+		return trim($this->name . " " . $this->lastname);
 	}
 
-	public static function delById($id)
-	{
-		$sql = "delete from " . self::$tablename . " where id=$id";
-		Executor::doit($sql);
-	}
-	public function del()
-	{
-		$sql = "delete from " . self::$tablename . " where id=$this->id";
-		Executor::doit($sql);
-	}
-	// partiendo de que ya tenemos creado un objecto PersonData previamente utilizamos el contexto
-	public function update_active()
-	{
-		$sql = "update " . self::$tablename . " set last_active_at=NOW() where id=$this->id";
-		$this->last_active_at = date("Y-m-d H:i:s"); // Update current object too
-		Executor::doit($sql);
+	public function getDepartment(): ?DepartmentData {
+		return $this->department_id ? DepartmentData::getById($this->department_id) : null;
 	}
 
-
-	public function update()
-	{
-		$sql = "update " . self::$tablename . " set name=\"$this->name\",lastname=\"$this->lastname\",address=\"$this->address\",phone=\"$this->phone\",email=\"$this->email\",c1_fullname=\"$this->c1_fullname\",c1_address=\"$this->c1_address\",c1_phone=\"$this->c1_phone\",c1_note=\"$this->c1_note\" where id=$this->id";
-		Executor::doit($sql);
+	public static function getById($id){
+		$db = static::getDb();
+		$stmt = $db->prepare("SELECT p.*, d.name AS department_name, d.code AS department_code
+		                      FROM " . static::$tablename . " p
+		                      LEFT JOIN department d ON d.id = p.department_id
+		                      WHERE p.id = :id LIMIT 1");
+		$stmt->execute(['id' => $id]);
+		$stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, static::class);
+		return $stmt->fetch() ?: null;
 	}
 
-	public static function getById($id)
-	{
-		$sql = "select * from " . self::$tablename . " where id=$id";
-		$query = Executor::doit($sql);
-		return Model::one($query[0], new PersonData());
+	public static function getAllActive(): array {
+		$db = static::getDb();
+		$stmt = $db->query("SELECT p.*, d.name AS department_name, d.code AS department_code
+		                    FROM " . static::$tablename . " p
+		                    LEFT JOIN department d ON d.id = p.department_id
+		                    WHERE p.is_active = 1
+		                    ORDER BY p.name ASC, p.lastname ASC");
+		return $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, static::class);
 	}
 
-
-	public static function getAll()
-	{
-		$sql = "select * from " . self::$tablename . " order by created_at desc";
-		$query = Executor::doit($sql);
-		return Model::many($query[0], new PersonData());
+	public static function getAllByDepartment($department_id): array {
+		$db = static::getDb();
+		$stmt = $db->prepare("SELECT p.*, d.name AS department_name, d.code AS department_code
+		                      FROM " . static::$tablename . " p
+		                      LEFT JOIN department d ON d.id = p.department_id
+		                      WHERE p.department_id = :dept_id AND p.is_active = 1
+		                      ORDER BY p.name ASC, p.lastname ASC");
+		$stmt->execute(['dept_id' => $department_id]);
+		return $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, static::class);
 	}
 
-	public static function count()
-	{
-		$sql = "select count(*) as c from " . self::$tablename;
-		$query = Executor::doit($sql);
-		return $query[0]->fetch_assoc()["c"];
+	public static function getAllWithAttendanceForDate(string $date, ?int $department_id = null): array {
+		$db = static::getDb();
+		$where = "WHERE p.is_active = 1";
+		$params = ['d' => $date];
+
+		if ($department_id) {
+			$where .= " AND p.department_id = :dept_id";
+			$params['dept_id'] = $department_id;
+		}
+
+		$sql = "SELECT p.*, d.name AS department_name, d.code AS department_code,
+		               a.id AS attendance_id, a.status_id AS today_status_id, a.note AS today_note,
+		               a.time_in AS today_time_in, a.time_out AS today_time_out,
+		               st.name AS today_status_name, st.color AS today_status_color,
+		               st.icon AS today_status_icon, st.badge_class AS today_status_badge
+		        FROM " . static::$tablename . " p
+		        LEFT JOIN department d ON d.id = p.department_id
+		        LEFT JOIN assistance a ON a.person_id = p.id AND a.date_at = :d
+		        LEFT JOIN assistance_status st ON st.id = a.status_id
+		        {$where}
+		        ORDER BY d.name ASC, p.name ASC, p.lastname ASC";
+
+		$stmt = $db->prepare($sql);
+		$stmt->execute($params);
+		return $stmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, static::class);
 	}
-
-
-	public static function getAllUnActive()
-	{
-		$sql = "select * from client where last_active_at<=date_sub(NOW(),interval 3 second)";
-		$query = Executor::doit($sql);
-		return Model::many($query[0], new PersonData());
-	}
-
-
-	public function getUnreads()
-	{
-		return MessageData::getUnreadsByClientId($this->id);
-	}
-
-
-	public static function getLike($q)
-	{
-		$sql = "select * from " . self::$tablename . " where title like '%$q%' or email like '%$q%'";
-		$query = Executor::doit($sql);
-		return Model::many($query[0], new PersonData());
-	}
-
-
 }
-
 ?>

@@ -1,0 +1,81 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}Registrar Colaborador{% endblock %}
+{% block page_title %}Registrar Colaborador{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3 bg-white p-4">
+            <h5 class="fw-bold mb-3 text-dark">Ficha del Nuevo Empleado</h5>
+
+            <form method="POST" action="{{ base_url }}/employees/create">
+                {{ csrf_field() }}
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Nombres *</label>
+                        <input type="text" name="name" class="form-control" placeholder="Ej. Alejandro" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Apellidos *</label>
+                        <input type="text" name="lastname" class="form-control" placeholder="Ej. Morales" required>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Código Empleado</label>
+                        <input type="text" name="code" class="form-control" placeholder="EMP-013">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">DNI / Cédula</label>
+                        <input type="text" name="dni_cif" class="form-control" placeholder="0928374612">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Departamento *</label>
+                        <select name="department_id" class="form-select" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for d in departments %}
+                                <option value="{{ d.id }}">[{{ d.code }}] {{ d.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Cargo / Puesto *</label>
+                        <input type="text" name="job_title" class="form-control" placeholder="Ej. Desarrollador Web" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Fecha de Ingreso</label>
+                        <input type="date" name="hire_date" class="form-control" value="{{ "now"|date("Y-m-d") }}">
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Correo Electrónico</label>
+                        <input type="email" name="email" class="form-control" placeholder="empleado@empresa.com">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Teléfono</label>
+                        <input type="text" name="phone" class="form-control" placeholder="0991234567">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-secondary text-uppercase">Dirección Domiciliaria</label>
+                    <input type="text" name="address" class="form-control" placeholder="Calle, Ciudad">
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{{ base_url }}/employees" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary fw-semibold px-4">Guardar Empleado</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

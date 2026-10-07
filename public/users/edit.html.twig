@@ -1,0 +1,68 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}Editar Usuario - {{ user.username }}{% endblock %}
+{% block page_title %}Editar Usuario{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-pencil-square text-primary me-2"></i>Modificar Datos del Usuario: {{ user.username }}
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ base_url }}/users/{{ user.id }}/update" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" value="{{ user.name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Apellido</label>
+                            <input type="text" name="lastname" class="form-control" value="{{ user.lastname }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nombre de Usuario</label>
+                            <input type="text" class="form-control bg-light" value="{{ user.username }}" readonly disabled>
+                            <small class="text-muted">El nombre de usuario no se puede cambiar.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Correo Electrónico <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nueva Contraseña</label>
+                            <input type="password" name="password" class="form-control" placeholder="Dejar en blanco para conservar actual">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Rol</label>
+                            <select name="is_admin" class="form-select">
+                                <option value="0" {% if not user.is_admin %}selected{% endif %}>Operador</option>
+                                <option value="1" {% if user.is_admin %}selected{% endif %}>Administrador</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Estado</label>
+                            <select name="is_active" class="form-select">
+                                <option value="1" {% if user.is_active %}selected{% endif %}>Activo</option>
+                                <option value="0" {% if not user.is_active %}selected{% endif %}>Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
+                        <a href="{{ base_url }}/users" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary fw-semibold px-4">
+                            <i class="bi bi-check-circle me-1"></i> Actualizar Usuario
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

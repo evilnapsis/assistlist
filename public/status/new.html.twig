@@ -1,0 +1,58 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}Nuevo Estado de Asistencia{% endblock %}
+{% block page_title %}Crear Estado de Asistencia{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-3 bg-white p-4">
+            <h5 class="fw-bold mb-3 text-dark">Configuración del Estado</h5>
+
+            <form method="POST" action="{{ base_url }}/status/create">
+                {{ csrf_field() }}
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary text-uppercase">Nombre Visible *</label>
+                    <input type="text" name="name" class="form-control" placeholder="Ej. Permiso con Goce" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary text-uppercase">Código Único (slug) *</label>
+                    <input type="text" name="code" class="form-control" placeholder="Ej. paid_permission" required>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Color Representativo</label>
+                        <input type="color" name="color" class="form-control form-control-color w-100" value="#198754">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Orden</label>
+                        <input type="number" name="order_num" class="form-control" value="8">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary text-uppercase">Ícono Bootstrap Icons</label>
+                    <input type="text" name="icon" class="form-control" value="bi-check-circle-fill">
+                    <small class="text-muted">Nombre de la clase (ej. <code>bi-check-circle-fill</code>, <code>bi-clock-history</code>, <code>bi-x-circle-fill</code>).</small>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-secondary text-uppercase">¿Computa como Asistencia para el %?</label>
+                    <select name="counts_as_present" class="form-select">
+                        <option value="1">Sí (Suma como presente/justificado)</option>
+                        <option value="0">No (Computa como falta)</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{{ base_url }}/status" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary fw-semibold px-4">Guardar Estado</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}Reporte de Asistencia por Rango de Fechas{% endblock %}
+{% block page_title %}Reportes de Asistencia Laboral{% endblock %}
+
+{% block content %}
+<!-- Filtros del Reporte -->
+<div class="card border-0 shadow-sm rounded-3 bg-white p-3 mb-4">
+    <form method="GET" action="{{ base_url }}/reports" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small fw-bold text-secondary text-uppercase mb-1">Fecha Inicial</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-calendar-event"></i></span>
+                <input type="date" name="start_date" class="form-control" value="{{ start_date }}" required>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label small fw-bold text-secondary text-uppercase mb-1">Fecha Final</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-calendar-event-fill"></i></span>
+                <input type="date" name="end_date" class="form-control" value="{{ end_date }}" required>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label small fw-bold text-secondary text-uppercase mb-1">Departamento</label>
+            <select name="department_id" class="form-select">
+                <option value="">-- Todos los Departamentos --</option>
+                {% for d in departments %}
+                    <option value="{{ d.id }}" {{ selected_dept == d.id ? 'selected' : '' }}>
+                        [{{ d.code }}] {{ d.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary fw-semibold flex-grow-1">
+                <i class="bi bi-funnel-fill me-1"></i> Filtrar
+            </button>
+            <a href="{{ base_url }}/reports/export-csv?start_date={{ start_date }}&end_date={{ end_date }}{% if selected_dept %}&department_id={{ selected_dept }}{% endif %}" class="btn btn-outline-success" title="Exportar a CSV / Excel">
+                <i class="bi bi-file-earmark-excel"></i>
+            </a>
+            <button type="button" class="btn btn-outline-secondary" onclick="window.print()" title="Imprimir Reporte">
+                <i class="bi bi-printer"></i>
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- WIDGETS DE TOTALES DEL REPORTE -->
+<div class="row g-3 mb-4">
+    <!-- Total Asistencias (Presentes) -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-stat bg-white p-3 h-100 shadow-sm border-0 rounded-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold text-uppercase">Total Asistencias</span>
+                <span class="badge bg-success-subtle text-success p-2 rounded-circle fs-5"><i class="bi bi-check-circle-fill"></i></span>
+            </div>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="fw-bold mb-0 text-success">{{ total_present }}</h2>
+                <small class="text-muted">Marcaciones</small>
+            </div>
+            <small class="text-muted mt-2">Colaboradores presentes</small>
+        </div>
+    </div>
+
+    <!-- Total Faltas (Ausencias) -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-stat bg-white p-3 h-100 shadow-sm border-0 rounded-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold text-uppercase">Total Faltas</span>
+                <span class="badge bg-danger-subtle text-danger p-2 rounded-circle fs-5"><i class="bi bi-x-circle-fill"></i></span>
+            </div>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="fw-bold mb-0 text-danger">{{ total_absent }}</h2>
+                <small class="text-danger fw-semibold">Ausencias</small>
+            </div>
+            <small class="text-muted mt-2">Faltas injustificadas</small>
+        </div>
+    </div>
+
+    <!-- Total Tardanzas -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-stat bg-white p-3 h-100 shadow-sm border-0 rounded-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold text-uppercase">Total Tardanzas</span>
+                <span class="badge bg-warning-subtle text-warning p-2 rounded-circle fs-5"><i class="bi bi-clock-history"></i></span>
+            </div>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="fw-bold mb-0 text-dark">{{ total_late }}</h2>
+                <small class="text-warning fw-semibold">Retardos</small>
+            </div>
+            <small class="text-muted mt-2">Llegadas fuera de horario</small>
+        </div>
+    </div>
+
+    <!-- Total Registros en el Rango -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-stat bg-white p-3 h-100 shadow-sm border-0 rounded-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold text-uppercase">Total Marcaciones</span>
+                <span class="badge bg-primary-subtle text-primary p-2 rounded-circle fs-5"><i class="bi bi-ui-checks"></i></span>
+            </div>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="fw-bold mb-0 text-dark">{{ total_records }}</h2>
+                <small class="text-muted">En el periodo</small>
+            </div>
+            <small class="text-muted mt-2">{{ days|length }} días analizados</small>
+        </div>
+    </div>
+</div>
+
+<!-- Desglose General de Totales por Cada Estado de Asistencia -->
+<div class="card border-0 shadow-sm rounded-3 bg-white mb-4 p-3">
+    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-tags-fill me-2 text-primary"></i>Totales por Estado de Asistencia en el Periodo</h6>
+    <div class="row g-2">
+        {% for st in global_status_counts %}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="p-2 rounded border bg-light d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge d-flex align-items-center justify-content-center p-2 rounded-circle" style="background-color: {{ st.color }}; color: #ffffff;">
+                        <i class="{{ st.icon }}"></i>
+                    </span>
+                    <div>
+                        <div class="fw-semibold text-dark small">{{ st.name }}</div>
+                        <small class="text-muted font-monospace">{{ st.code }}</small>
+                    </div>
+                </div>
+                <span class="badge bg-white text-dark border fs-6 fw-bold px-3 py-1">{{ st.count }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- LISTADO DE EMPLEADOS Y SUS ASISTENCIAS EN EL RANGO DE FECHAS -->
+<div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <div>
+            <h6 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-table me-2 text-primary"></i>Matriz de Asistencias del Periodo ({{ start_date|date('d/m/Y') }} al {{ end_date|date('d/m/Y') }})
+            </h6>
+            <small class="text-muted">{{ employees|length }} colaboradores evaluados en {{ days|length }} días</small>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="small text-muted"><span class="badge bg-secondary-subtle text-secondary me-1">S/D</span> Fin de semana</span>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle mb-0 text-center" style="font-size: 0.82rem;">
+            <thead class="table-light">
+                <tr>
+                    <th class="text-start" style="min-width: 200px;">Colaborador</th>
+                    <th class="text-start" style="min-width: 140px;">Departamento</th>
+                    {% for day in days %}
+                        <th class="{{ day.is_weekend ? 'bg-secondary-subtle text-secondary' : '' }}" style="min-width: 44px; padding: 4px;" title="{{ day.date }}">
+                            <div class="fw-bold">{{ day.day_num }}</div>
+                            <small class="text-uppercase" style="font-size: 0.68rem;">{{ day.day_name }}</small>
+                        </th>
+                    {% endfor %}
+                    <th style="min-width: 60px;" class="text-success fw-bold" title="Presentes">P</th>
+                    <th style="min-width: 60px;" class="text-danger fw-bold" title="Faltas">F</th>
+                    <th style="min-width: 60px;" class="text-warning fw-bold" title="Tardanzas">T</th>
+                    <th style="min-width: 70px;" class="fw-bold">% Asist</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if employees is empty %}
+                    <tr>
+                        <td colspan="{{ days|length + 6 }}" class="py-5 text-muted text-center">
+                            <i class="bi bi-people fs-1 d-block mb-2"></i>
+                            No se encontraron empleados registrados en este criterio.
+                        </td>
+                    </tr>
+                {% else %}
+                    {% for emp in employees %}
+                    {% set sum = employee_summaries[emp.id] %}
+                    <tr>
+                        <td class="text-start">
+                            <a href="{{ base_url }}/employees/{{ emp.id }}" class="fw-bold text-dark text-decoration-none">
+                                {{ emp.getFullname() }}
+                            </a>
+                            <small class="text-muted font-monospace d-block">[{{ emp.code }}]</small>
+                        </td>
+                        <td class="text-start">
+                            <span class="small text-secondary">{{ emp.department_name|default('Sin Asignar') }}</span>
+                        </td>
+                        {% for day in days %}
+                            {% set rec = matrix[emp.id][day.date] %}
+                            <td class="{{ day.is_weekend ? 'bg-light' : '' }}" style="padding: 3px;">
+                                {% if rec %}
+                                    <span class="badge p-1 d-inline-flex align-items-center justify-content-center" style="background-color: {{ rec.status_color }}; color: #ffffff; width: 24px; height: 24px; border-radius: 4px;" title="{{ day.date }}: {{ rec.status_name }} ({{ rec.time_in ? rec.time_in|slice(0, 5) : '-' }}) {{ rec.note ? ' - ' ~ rec.note : '' }}">
+                                        <i class="{{ rec.status_icon }}" style="font-size: 0.72rem;"></i>
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted opacity-50" title="{{ day.date }}: Sin registrar (NULL)">-</span>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                        <td class="fw-bold text-success">{{ sum.total_present }}</td>
+                        <td class="fw-bold text-danger">{{ sum.total_absent }}</td>
+                        <td class="fw-bold text-warning">{{ sum.total_late }}</td>
+                        <td>
+                            <span class="badge {{ sum.rate >= 80 ? 'bg-success-subtle text-success' : (sum.rate >= 50 ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger') }} fw-bold">
+                                {{ sum.rate }}%
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

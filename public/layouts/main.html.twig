@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>{% block title %}AssistList Lite v4{% endblock %} - Control de Asistencia Laboral</title>
+
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- CoreUI v5 Vendors & Main Styles -->
+    <link rel="stylesheet" href="{{ base_url }}/assets/coreui/vendors/simplebar/css/simplebar.css">
+    <link rel="stylesheet" href="{{ base_url }}/assets/coreui/css/vendors/simplebar.css">
+    <link rel="stylesheet" href="{{ base_url }}/assets/coreui/css/style.css">
+
+    <script src="{{ base_url }}/assets/jquery/jquery.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* ========================================================
+           TEMA MORADO OSCURO - SIDEBAR ASSISTLIST 2
+        ======================================================== */
+        :root {
+            --sidebar-dark-purple-bg: #1b0e33;
+            --sidebar-dark-purple-header: #130926;
+            --sidebar-dark-purple-footer: #110722;
+            --sidebar-dark-purple-border: rgba(255, 255, 255, 0.08);
+            --sidebar-nav-title: #c084fc;
+            --sidebar-nav-link: #e9d5ff;
+            --sidebar-nav-icon: #c084fc;
+            --sidebar-hover-bg: rgba(168, 85, 247, 0.16);
+            --sidebar-hover-color: #ffffff;
+            --sidebar-hover-icon: #f3e8ff;
+            --sidebar-active-bg: linear-gradient(135deg, #7e22ce 0%, #9333ea 50%, #a855f7 100%);
+            --sidebar-active-color: #ffffff;
+            --sidebar-active-shadow: 0 4px 16px rgba(168, 85, 247, 0.45);
+        }
+
+        #sidebar {
+            background-color: var(--sidebar-dark-purple-bg) !important;
+            border-right: 1px solid var(--sidebar-dark-purple-border) !important;
+            transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            z-index: 1030;
+        }
+
+        /* Alineación exacta con la barra header blanca (60px de altura) */
+        #sidebar .sidebar-header {
+            background-color: var(--sidebar-dark-purple-header) !important;
+            border-bottom: 1px solid var(--sidebar-dark-purple-border) !important;
+            height: 60px !important;
+            min-height: 60px !important;
+            max-height: 60px !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 1.25rem !important;
+            box-sizing: border-box !important;
+        }
+
+        header.header .header-top-row {
+            height: 60px !important;
+            min-height: 60px !important;
+            max-height: 60px !important;
+            display: flex !important;
+            align-items: center !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Logo y Marcas */
+        .sidebar-brand-full {
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: #ffffff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .brand-icon-box {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #9333ea 0%, #c084fc 100%);
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(147, 51, 234, 0.4);
+        }
+
+        .bg-purple-pill {
+            background-color: #9333ea !important;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.45rem;
+            border-radius: 6px;
+        }
+
+        .sidebar-brand-narrow {
+            display: none !important;
+            color: #fff;
+        }
+
+        .brand-mini-badge {
+            background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+            color: #ffffff !important;
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
+            padding: 0.35rem 0.65rem;
+            border-radius: 8px;
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #sidebar .sidebar-footer {
+            background-color: var(--sidebar-dark-purple-footer) !important;
+            border-top: 1px solid var(--sidebar-dark-purple-border) !important;
+            height: 48px;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        #sidebar .sidebar-nav {
+            background: transparent !important;
+        }
+
+        #sidebar .sidebar-nav .nav-title {
+            color: var(--sidebar-nav-title) !important;
+            font-size: 0.68rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.08em !important;
+            text-transform: uppercase !important;
+            padding: 0.85rem 1.25rem 0.35rem !important;
+            margin-top: 0.5rem !important;
+        }
+
+        /* Enlaces normales del sidebar */
+        #sidebar .sidebar-nav .nav-link {
+            color: var(--sidebar-nav-link) !important;
+            font-size: 0.88rem !important;
+            font-weight: 500 !important;
+            padding: 0.65rem 1rem !important;
+            margin: 3px 10px !important;
+            border-radius: 8px !important;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            display: flex !important;
+            align-items: center !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+        }
+
+        #sidebar .sidebar-nav .nav-link .nav-icon {
+            color: var(--sidebar-nav-icon) !important;
+            font-size: 1.15rem !important;
+            margin-right: 0.75rem !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 1.5rem !important;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            flex-shrink: 0 !important;
+        }
+
+        /* Efecto Hover Morado Suave */
+        #sidebar .sidebar-nav .nav-link:hover {
+            background-color: var(--sidebar-hover-bg) !important;
+            color: var(--sidebar-hover-color) !important;
+            transform: translateX(4px) !important;
+        }
+
+        #sidebar .sidebar-nav .nav-link:hover .nav-icon {
+            color: var(--sidebar-hover-icon) !important;
+            transform: scale(1.15) !important;
+        }
+
+        /* Menú Activo con Degradado Morado Luminoso y Resplandor */
+        #sidebar .sidebar-nav .nav-link.active,
+        #sidebar .sidebar-nav .nav-item.active > .nav-link {
+            background: var(--sidebar-active-bg) !important;
+            color: var(--sidebar-active-color) !important;
+            font-weight: 600 !important;
+            box-shadow: var(--sidebar-active-shadow) !important;
+            transform: none !important;
+        }
+
+        #sidebar .sidebar-nav .nav-link.active .nav-icon,
+        #sidebar .sidebar-nav .nav-item.active > .nav-link .nav-icon {
+            color: #ffffff !important;
+        }
+
+        /* Botón Toggler */
+        #sidebar .sidebar-toggler {
+            background: transparent !important;
+            border: 0 !important;
+            color: var(--sidebar-nav-title) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            height: 100% !important;
+            cursor: pointer !important;
+            padding: 0.5rem !important;
+            transition: color 0.2s ease !important;
+        }
+
+        #sidebar .sidebar-toggler:hover {
+            color: #ffffff !important;
+        }
+
+        #sidebar .sidebar-toggler .toggler-icon {
+            font-size: 1.15rem !important;
+            transition: transform 0.25s ease !important;
+        }
+
+        /* ========================================================
+           MODO SIDEBAR NARROW / MINI (SOLO ICONOS)
+        ======================================================== */
+        #sidebar.sidebar-narrow,
+        #sidebar.sidebar-narrow-unfoldable:not(:hover) {
+            width: 4.25rem !important;
+            min-width: 4.25rem !important;
+            max-width: 4.25rem !important;
+            overflow-x: hidden !important;
+        }
+
+        #sidebar.sidebar-narrow .sidebar-brand-full,
+        #sidebar.sidebar-narrow-unfoldable:not(:hover) .sidebar-brand-full {
+            display: none !important;
+        }
+
+        #sidebar.sidebar-narrow .sidebar-brand-narrow,
+        #sidebar.sidebar-narrow-unfoldable:not(:hover) .sidebar-brand-narrow {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }
+
+        #sidebar.sidebar-narrow .sidebar-header,
+        #sidebar.sidebar-narrow-unfoldable:not(:hover) .sidebar-header {
+            padding: 0 !important;
+            justify-content: center !important;
+        }
+
+        #sidebar.sidebar-narrow .nav-title,
+        #sidebar.sidebar-narrow-unfoldable:not(:hover) .nav-title {
+            display: none !important;
+            height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+
+        #sidebar.sidebar-narrow .nav-link,
+        #sidebar.sidebar-narrow-unfoldable:not(:hover) .nav-link {
+            justify-content: center !important;
+            padding: 0.75rem 0 !important;
+            margin: 4px 6px !important;
+            transform: none !important;
+            text-align: center !important;
+            font-size: 0 !important; /* Oculta cualquier texto residual */
+            overflow: hidden !important;
+        }
+
+        #sidebar.sidebar-narrow .nav-link .nav-text,
+        #sidebar.sidebar-narrow-unfoldable:not(:hover) .nav-link .nav-text {
+            display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            height: 0 !important;
+            opacity: 0 !important;
+        }
+
+        #sidebar.sidebar-narrow .nav-link .nav-icon,
+        #sidebar.sidebar-narrow-unfoldable:not(:hover) .nav-link .nav-icon {
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+            font-size: 1.35rem !important;
+            width: 100% !important;
+            text-align: center !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        #sidebar.sidebar-narrow .sidebar-toggler .toggler-icon,
+        #sidebar.sidebar-narrow-unfoldable:not(:hover) .sidebar-toggler .toggler-icon {
+            transform: rotate(180deg) !important;
+        }
+
+        #sidebar.sidebar-narrow .nav-link:hover .nav-icon,
+        #sidebar.sidebar-narrow-unfoldable:not(:hover) .nav-link:hover .nav-icon {
+            transform: scale(1.2) !important;
+        }
+
+        #sidebar.sidebar-narrow-unfoldable:hover {
+            width: 16rem !important;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.45) !important;
+        }
+
+        @media (min-width: 992px) {
+            #sidebar.sidebar-narrow ~ .wrapper,
+            #sidebar.sidebar-narrow-unfoldable:not(:hover) ~ .wrapper {
+                padding-inline-start: 4.25rem !important;
+            }
+        }
+
+        /* Widgets & Chips adicionales */
+        .card-stat {
+            border: none;
+            border-radius: 0.85rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .card-stat:hover {
+            transform: translateY(-2px);
+        }
+        .table-responsive {
+            border-radius: 0.75rem;
+        }
+        .attendance-chip {
+            padding: 0.35rem 0.65rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: #fff;
+        }
+    </style>
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar CoreUI v5 con Tema Morado Oscuro y Modo Narrow -->
+    <div class="sidebar sidebar-dark sidebar-fixed border-end" id="sidebar">
+        <div class="sidebar-header border-bottom">
+            <a class="sidebar-brand text-decoration-none d-flex align-items-center w-100" href="{{ base_url }}/">
+                <!-- Marca Completa -->
+                <span class="sidebar-brand-full d-flex align-items-center">
+                    <span class="brand-icon-box me-2">
+                        <i class="bi bi-calendar-check-fill"></i>
+                    </span>
+                    <span class="fw-bold">AssistList <span class="badge bg-purple-pill text-white ms-1">v4</span></span>
+                </span>
+                <!-- Marca Narrow / Mini (AL) Resaltado -->
+                <span class="sidebar-brand-narrow">
+                    <span class="brand-mini-badge" title="AssistList Lite v4">AL</span>
+                </span>
+            </a>
+            <button class="btn-close d-lg-none" type="button" data-coreui-theme="dark" aria-label="Close" onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()"></button>
+        </div>
+
+        <ul class="sidebar-nav" data-coreui="navigation" data-simplebar>
+            {% if session.user_id %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ base_url }}/">
+                    <span class="nav-icon"><i class="bi bi-speedometer2"></i></span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+
+            <li class="nav-title">Operaciones</li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ base_url }}/attendance/take">
+                    <span class="nav-icon"><i class="bi bi-ui-checks-grid"></i></span>
+                    <span class="nav-text">Asistencia</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ base_url }}/reports/monthly">
+                    <span class="nav-icon"><i class="bi bi-calendar3"></i></span>
+                    <span class="nav-text">Vista Mensual</span>
+                </a>
+            </li>
+
+            <li class="nav-title">Organización Empresarial</li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ base_url }}/departments">
+                    <span class="nav-icon"><i class="bi bi-diagram-3-fill"></i></span>
+                    <span class="nav-text">Departamentos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ base_url }}/employees">
+                    <span class="nav-icon"><i class="bi bi-people-fill"></i></span>
+                    <span class="nav-text">Empleados</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ base_url }}/status">
+                    <span class="nav-icon"><i class="bi bi-tags-fill"></i></span>
+                    <span class="nav-text">Estados de asistencia</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ base_url }}/reports">
+                    <span class="nav-icon"><i class="bi bi-file-earmark-bar-graph"></i></span>
+                    <span class="nav-text">Reportes</span>
+                </a>
+            </li>
+
+            {% if session.is_admin %}
+            <li class="nav-title">Administración</li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ base_url }}/users">
+                    <span class="nav-icon"><i class="bi bi-person-gear"></i></span>
+                    <span class="nav-text">Usuarios</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% endif %}
+        </ul>
+        <div class="sidebar-footer border-top d-none d-md-flex">
+            <button class="sidebar-toggler" type="button" id="sidebarTogglerBtn" title="Alternar menú lateral">
+                <i class="bi bi-chevron-left toggler-icon" id="sidebarTogglerIcon"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Wrapper Principal -->
+    <div class="wrapper d-flex flex-column min-vh-100 bg-light">
+        <!-- Header Superior -->
+        <header class="header header-sticky mb-4 p-0 border-bottom bg-white shadow-sm">
+            <div class="container-fluid header-top-row border-bottom px-4">
+                <button class="header-toggler px-md-0 me-md-3" type="button" onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()">
+                    <i class="bi bi-list fs-3"></i>
+                </button>
+                <span class="d-none d-md-inline text-muted small fw-medium">
+                    <i class="bi bi-building me-1"></i> Control de Asistencia & Puntualidad Laboral
+                </span>
+
+                <ul class="header-nav ms-auto align-items-center gap-3">
+                    <li class="nav-item">
+                        <a href="{{ base_url }}/attendance/take" class="btn btn-sm btn-success text-white fw-semibold d-flex align-items-center gap-1">
+                            <i class="bi bi-check2-circle"></i> Tomar Lista Hoy
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="header-nav ms-3">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link py-0 d-flex align-items-center gap-2" data-coreui-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                            <div class="avatar avatar-md bg-purple-badge text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="background-color: #9333ea;">
+                                {{ session.user_name|slice(0, 1)|upper }}
+                            </div>
+                            <div class="d-none d-md-block text-start">
+                                <span class="fw-semibold text-dark d-block leading-tight">{{ session.user_name }}</span>
+                                <small class="text-muted" style="font-size: 0.72rem;">{{ session.is_admin ? 'Administrador' : 'Supervisor' }}</small>
+                            </div>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end pt-0 shadow-sm border-0">
+                            <div class="dropdown-header bg-light py-2">
+                                <div class="fw-semibold">Sesión Activa</div>
+                            </div>
+                            <a class="dropdown-item" href="{{ base_url }}/"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="{{ base_url }}/logout">
+                                <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Breadcrumb y fecha actual -->
+            <div class="container-fluid px-4 py-2 bg-light d-flex justify-content-between align-items-center">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb my-0 small">
+                        <li class="breadcrumb-item"><a href="{{ base_url }}/" class="text-decoration-none">Inicio</a></li>
+                        <li class="breadcrumb-item active"><span>{% block page_title %}Panel{% endblock %}</span></li>
+                    </ol>
+                </nav>
+                <div class="text-muted small">
+                    <i class="bi bi-clock me-1"></i> {{ "now"|date("d/m/Y") }}
+                </div>
+            </div>
+        </header>
+
+        <!-- Contenido Central -->
+        <div class="body flex-grow-1 px-3 px-lg-4">
+            <div class="container-fluid">
+                <!-- Alertas Flash -->
+                {% if flashes.success %}
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
+                        <i class="bi bi-check-circle-fill me-2 fs-5 align-middle"></i> {{ flashes.success }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+                {% if flashes.error %}
+                    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i> {{ flashes.error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+                {% if flashes.info %}
+                    <div class="alert alert-info alert-dismissible fade show shadow-sm border-0" role="alert">
+                        <i class="bi bi-info-circle-fill me-2 fs-5 align-middle"></i> {{ flashes.info }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer bg-white border-top py-3 mt-4 text-muted small">
+            <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+                <div><strong>AssistList Lite</strong> <span class="badge bg-purple-pill text-white ms-1" style="font-size: 0.72rem;">v4</span> &copy; 2026. Sistema de Control de Asistencias con PHP y MySQL.</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts CoreUI & Bootstrap -->
+    <script src="{{ base_url }}/assets/coreui/vendors/@coreui/coreui/js/coreui.bundle.min.js"></script>
+    <script src="{{ base_url }}/assets/coreui/vendors/simplebar/js/simplebar.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('sidebar');
+            const toggler = document.getElementById('sidebarTogglerBtn');
+            const togglerIcon = document.getElementById('sidebarTogglerIcon');
+
+            // 1. Alternar modo estrecho / mini
+            function toggleSidebarNarrow() {
+                if (!sidebar) return;
+                const isNarrow = sidebar.classList.toggle('sidebar-narrow');
+                localStorage.setItem('assistlist2_sidebar_narrow', isNarrow ? '1' : '0');
+                if (togglerIcon) {
+                    togglerIcon.className = isNarrow ? 'bi bi-chevron-right toggler-icon' : 'bi bi-chevron-left toggler-icon';
+                }
+            }
+
+            if (toggler) {
+                toggler.addEventListener('click', toggleSidebarNarrow);
+            }
+
+            // Restaurar estado guardado de narrow mode
+            if (localStorage.getItem('assistlist2_sidebar_narrow') === '1' && sidebar) {
+                sidebar.classList.add('sidebar-narrow');
+                if (togglerIcon) {
+                    togglerIcon.className = 'bi bi-chevron-right toggler-icon';
+                }
+            }
+
+            // 2. Detección automática del enlace activo en el Sidebar
+            const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+            const navLinks = document.querySelectorAll('#sidebar .nav-link');
+            let foundActive = false;
+
+            navLinks.forEach(link => {
+                const linkHref = link.getAttribute('href');
+                if (!linkHref) return;
+                const linkUrl = new URL(linkHref, window.location.origin);
+                const linkPath = linkUrl.pathname.replace(/\/$/, '') || '/';
+
+                if (linkPath === currentPath) {
+                    link.classList.add('active');
+                    foundActive = true;
+                }
+            });
+
+            if (!foundActive) {
+                navLinks.forEach(link => {
+                    const linkHref = link.getAttribute('href');
+                    if (!linkHref) return;
+                    const linkUrl = new URL(linkHref, window.location.origin);
+                    const linkPath = linkUrl.pathname.replace(/\/$/, '') || '/';
+
+                    if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
+                        link.classList.add('active');
+                    } else if (linkPath.includes('/employees') && currentPath.includes('/employee/')) {
+                        link.classList.add('active');
+                    } else if (linkPath.includes('/departments') && currentPath.includes('/department/')) {
+                        link.classList.add('active');
+                    } else if (linkPath.includes('/status') && currentPath.includes('/status/')) {
+                        link.classList.add('active');
+                    } else if (linkPath.includes('/users') && currentPath.includes('/user/')) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    </script>
+
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

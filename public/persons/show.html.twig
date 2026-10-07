@@ -1,0 +1,110 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}{{ emp.getFullname() }}{% endblock %}
+{% block page_title %}Ficha del Colaborador{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <!-- Perfil del Empleado -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 bg-white p-4 text-center">
+            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center fw-bold fs-1 mx-auto mb-3" style="width: 80px; height: 80px;">
+                {{ emp.name|slice(0, 1)|upper }}
+            </div>
+            <h4 class="fw-bold text-dark mb-1">{{ emp.getFullname() }}</h4>
+            <span class="badge bg-light text-dark border font-monospace fs-6 mb-2">{{ emp.code }}</span>
+            <div class="text-muted fw-semibold small mb-3">{{ emp.job_title }}</div>
+
+            <hr class="my-3">
+
+            <div class="text-start small">
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-secondary">Departamento:</span>
+                    <span class="fw-bold">{{ emp.department_name|default('Sin Asignar') }}</span>
+                </div>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-secondary">DNI / Cédula:</span>
+                    <span>{{ emp.dni_cif|default('-') }}</span>
+                </div>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-secondary">Correo:</span>
+                    <span>{{ emp.email|default('-') }}</span>
+                </div>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-secondary">Teléfono:</span>
+                    <span>{{ emp.phone|default('-') }}</span>
+                </div>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-secondary">Fecha Ingreso:</span>
+                    <span>{{ emp.hire_date ? emp.hire_date|date('d/m/Y') : '-' }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary">Estado:</span>
+                    <span class="badge {{ emp.is_active ? 'bg-success-subtle text-success' : 'bg-secondary' }}">
+                        {{ emp.is_active ? 'Activo' : 'Inactivo' }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <a href="{{ base_url }}/employees/{{ emp.id }}/edit" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-pencil me-1"></i> Editar
+                </a>
+                <a href="{{ base_url }}/employees" class="btn btn-light border w-100">
+                    Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de Asistencias del Empleado -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3 bg-white">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>Historial Reciente de Asistencias</h6>
+                <span class="badge bg-light text-dark border">{{ history|length }} Registros</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small text-uppercase">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora Entrada</th>
+                            <th>Estado</th>
+                            <th>Observación / Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if history is empty %}
+                            <tr><td colspan="4" class="text-center py-4 text-muted">No hay registros de asistencia para este colaborador.</td></tr>
+                        {% else %}
+                            {% for a in history %}
+                            <tr>
+                                <td>
+                                    <span class="fw-bold text-dark">{{ a.date_at|date('d/m/Y') }}</span>
+                                </td>
+                                <td>
+                                    {% if a.time_in %}
+                                        <span class="font-monospace small"><i class="bi bi-clock me-1 text-muted"></i>{{ a.time_in }}</span>
+                                    {% else %}
+                                        <span class="text-muted small">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="attendance-chip" style="background-color: {{ a.status_color }};">
+                                        <i class="{{ a.status_icon }}"></i> {{ a.status_name }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ a.note|default('-') }}</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,37 +1,52 @@
 <?php
-class Database
-{
+class Database {
 	public static $db;
 	public static $con;
+	public static $pdo;
 
-	public $user;
-	public $pass;
-	public $host;
-	public $ddbb;
+	public $user, $pass, $host, $ddbb;
 
-	function __construct()
-	{ //		$this->user="root";$this->pass="";$this->host="localhost";$this->ddbb="lbmin"; // Windows
+	function __construct(){
 		$this->user = "root";
 		$this->pass = "";
 		$this->host = "localhost";
-		$this->ddbb = "assistlist"; // Linux
+		$this->ddbb = "assistlist2";
 	}
 
-	function connect()
-	{
+	function connect(){
 		$con = new mysqli($this->host, $this->user, $this->pass, $this->ddbb);
+		$con->query("set session sql_mode = ''");
+		$con->set_charset("utf8mb4");
 		return $con;
 	}
 
-	public static function getCon()
-	{
-		if (self::$con == null && self::$db == null) {
-			self::$db = new Database();
+	function connectPdo(){
+		$dsn = "mysql:host={$this->host};dbname={$this->ddbb};charset=utf8mb4";
+		$pdo = new PDO($dsn, $this->user, $this->pass, [
+			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ
+		]);
+		return $pdo;
+	}
+
+	public static function getCon(){
+		if(self::$con == null){
+			if(self::$db == null){
+				self::$db = new Database();
+			}
 			self::$con = self::$db->connect();
 		}
 		return self::$con;
 	}
 
-
+	public static function getPdo(){
+		if(self::$pdo == null){
+			if(self::$db == null){
+				self::$db = new Database();
+			}
+			self::$pdo = self::$db->connectPdo();
+		}
+		return self::$pdo;
+	}
 }
 ?>

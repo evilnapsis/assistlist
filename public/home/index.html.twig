@@ -1,0 +1,376 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}Dashboard General{% endblock %}
+{% block page_title %}Dashboard de Asistencia Empresarial{% endblock %}
+
+{% block content %}
+<!-- Tarjetas KPI Superiores -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-stat bg-white p-3 h-100 shadow-sm rounded-3" style="border: 2px solid #3b82f6 !important;">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold text-uppercase">Total Empleados</span>
+                <span class="badge bg-primary-subtle text-primary p-2 rounded-circle fs-5"><i class="bi bi-people-fill"></i></span>
+            </div>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="fw-bold mb-0 text-dark">{{ summary.stats.total_employees }}</h2>
+                <small class="text-success fw-semibold"><i class="bi bi-check-circle me-1"></i>Activos</small>
+            </div>
+            <small class="text-muted mt-2">En {{ summary.departments|length }} departamentos</small>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-stat bg-white p-3 h-100 shadow-sm rounded-3" style="border: 2px solid #10b981 !important;">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold text-uppercase">Asistencia Hoy</span>
+                <span class="badge bg-success-subtle text-success p-2 rounded-circle fs-5"><i class="bi bi-pie-chart-fill"></i></span>
+            </div>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="fw-bold mb-0 text-success">{{ summary.stats.attendance_percentage }}%</h2>
+                <small class="text-muted">Efectividad</small>
+            </div>
+            <small class="text-muted mt-2">{{ summary.stats.marked_count }} marcaciones registradas</small>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-stat bg-white p-3 h-100 shadow-sm rounded-3" style="border: 2px solid #8b5cf6 !important;">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold text-uppercase">Presentes Hoy</span>
+                <span class="badge p-2 rounded-circle fs-5" style="background-color: #ede9fe; color: #7c3aed;"><i class="bi bi-check-circle-fill"></i></span>
+            </div>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="fw-bold mb-0 text-dark">{{ summary.stats.present_count }}</h2>
+                <small class="text-warning fw-semibold">+{{ summary.stats.late_count }} Tardanzas</small>
+            </div>
+            <small class="text-muted mt-2">En sus puestos de trabajo</small>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card card-stat bg-white p-3 h-100 shadow-sm rounded-3" style="border: 2px solid #ef4444 !important;">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold text-uppercase">Ausencias / Faltas</span>
+                <span class="badge bg-danger-subtle text-danger p-2 rounded-circle fs-5"><i class="bi bi-x-circle-fill"></i></span>
+            </div>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="fw-bold mb-0 text-danger">{{ summary.stats.absent_count }}</h2>
+                <small class="text-danger fw-semibold">Injustificadas</small>
+            </div>
+            <small class="text-muted mt-2">Colaboradores ausentes</small>
+        </div>
+    </div>
+</div>
+
+<!-- SECCIÓN DE GRÁFICAS DEL DASHBOARD -->
+
+<!-- Gráfica 1: Asistencia de los últimos 30 días (Solo asistencias presentes) -->
+<div class="card border-0 shadow-sm rounded-3 bg-white mb-4" style="border-top: 4px solid #10b981 !important;">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <div>
+            <h6 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-graph-up-arrow me-2 text-success"></i>Tendencia de Asistencia de los Últimos 30 Días
+            </h6>
+        </div>
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+            <i class="bi bi-calendar-range me-1"></i>Últimos 30 Días
+        </span>
+    </div>
+    <div class="card-body p-4">
+        <div style="height: 280px; width: 100%;">
+            <canvas id="last30Chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Fila Gráficas 2 y 3 -->
+<div class="row g-4 mb-4">
+    <!-- Gráfica 2: Barras por departamento (Presentes, Faltas y Tardanzas) -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-3 h-100 bg-white" style="border-top: 4px solid #8b5cf6 !important;">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-bar-chart-fill me-2" style="color: #8b5cf6;"></i>Asistencia por Departamento (Presentes vs Faltas)
+                    </h6>
+                </div>
+                <span class="badge bg-light text-dark border">{{ summary.date }}</span>
+            </div>
+            <div class="card-body p-4">
+                <div style="height: 300px; width: 100%;">
+                    <canvas id="deptBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfica 3: Empleados con asistencia vs Sin definir (NULL) -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-3 h-100 bg-white" style="border-top: 4px solid #06b6d4 !important;">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-pie-chart-fill me-2 text-info"></i>Estado del Pase de Asistencia
+                    </h6>
+                </div>
+                <span class="badge bg-light text-dark border">{{ summary.date }}</span>
+            </div>
+            <div class="card-body d-flex flex-column justify-content-center align-items-center p-4">
+                <div style="width: 100%; max-width: 250px; height: 250px;">
+                    <canvas id="nullAttendanceChart"></canvas>
+                </div>
+                <div class="mt-3 w-100 pt-2 border-top">
+                    <div class="row text-center small">
+                        <div class="col-6 border-end">
+                            <span class="d-inline-block rounded-circle me-1" style="width: 10px; height: 10px; background-color: #198754;"></span>
+                            <span class="text-muted">Con Asistencia:</span>
+                            <div class="fs-5 fw-bold text-success">{{ summary.stats.marked_count }}</div>
+                        </div>
+                        <div class="col-6">
+                            <span class="d-inline-block rounded-circle me-1" style="width: 10px; height: 10px; background-color: #adb5bd;"></span>
+                            <span class="text-muted">Sin Definir (NULL):</span>
+                            <div class="fs-5 fw-bold text-secondary">{{ summary.stats.unmarked_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de Marcaciones del Día -->
+<div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <div>
+            <h6 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-list-check me-2 text-success"></i>Detalle de Marcaciones Registradas Hoy
+            </h6>
+            <small class="text-muted">Nómina del día {{ summary.date }}</small>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ base_url }}/attendance/take" class="btn btn-sm btn-success fw-semibold text-white">
+                <i class="bi bi-pencil-square me-1"></i> Pasar Asistencia
+            </a>
+            <a href="{{ base_url }}/reports/monthly" class="btn btn-sm btn-outline-dark">
+                <i class="bi bi-calendar3 me-1"></i> Vista Mensual
+            </a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small text-uppercase">
+                <tr>
+                    <th>Código</th>
+                    <th>Colaborador</th>
+                    <th>Departamento & Cargo</th>
+                    <th>Hora Entrada</th>
+                    <th>Estado Asistencia</th>
+                    <th>Observación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in employees_today %}
+                <tr>
+                    <td>
+                        <span class="badge bg-light text-dark border font-monospace">{{ emp.code }}</span>
+                    </td>
+                    <td>
+                        <div class="fw-bold text-dark">{{ emp.getFullname() }}</div>
+                        <small class="text-muted">{{ emp.email }}</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-primary-subtle text-primary me-1">{{ emp.department_name }}</span>
+                        <small class="text-secondary d-block mt-1">{{ emp.job_title }}</small>
+                    </td>
+                    <td>
+                        {% if emp.today_time_in %}
+                            <span class="font-monospace small"><i class="bi bi-clock me-1 text-muted"></i>{{ emp.today_time_in|slice(0, 5) }}</span>
+                        {% else %}
+                            <span class="text-muted small">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if emp.today_status_id %}
+                            <span class="badge" style="background-color: {{ emp.today_status_color }}; color: #ffffff;">
+                                <i class="{{ emp.today_status_icon }} me-1"></i> {{ emp.today_status_name }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary">
+                                <i class="bi bi-dash-circle me-1"></i> Sin registrar (NULL)
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small class="text-muted">{{ emp.today_note|default('-') }}</small>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Gráfica 1: Últimos 30 días (solo asistencias presentes)
+    const ctx30 = document.getElementById('last30Chart');
+    if (ctx30) {
+        const last30Labels = {{ last30_labels_json|raw }};
+        const last30Data = {{ last30_data_json|raw }};
+
+        new Chart(ctx30.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: last30Labels,
+                datasets: [{
+                    label: 'Colaboradores Presentes',
+                    data: last30Data,
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.12)',
+                    fill: true,
+                    tension: 0.35,
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#198754',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.parsed.y} presentes`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 2. Gráfica 2: Barras por departamento (Presentes vs Faltas vs Tardanzas)
+    const ctxDept = document.getElementById('deptBarChart');
+    if (ctxDept) {
+        const deptLabels = {{ dept_labels_json|raw }};
+        const deptPresents = {{ dept_presents_json|raw }};
+        const deptAbsents = {{ dept_absents_json|raw }};
+        const deptLates = {{ dept_lates_json|raw }};
+
+        new Chart(ctxDept.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: deptLabels,
+                datasets: [
+                    {
+                        label: 'Presentes',
+                        data: deptPresents,
+                        backgroundColor: '#198754',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Faltas',
+                        data: deptAbsents,
+                        backgroundColor: '#dc3545',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Tardanzas',
+                        data: deptLates,
+                        backgroundColor: '#ffc107',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 8
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 3. Gráfica 3: Empleados con asistencia vs Sin definir (NULL)
+    const ctxNull = document.getElementById('nullAttendanceChart');
+    if (ctxNull) {
+        const nullData = {{ null_chart_data_json|raw }};
+
+        new Chart(ctxNull.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Con Asistencia', 'Sin Definir (NULL)'],
+                datasets: [{
+                    data: nullData,
+                    backgroundColor: ['#198754', '#adb5bd'],
+                    borderColor: '#ffffff',
+                    borderWidth: 3,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
